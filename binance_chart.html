@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <link rel='stylesheet' href='style.css'>
+    <title>Lightweight Charts™ Customization Tutorial</title>
+    <!-- Adding the standalone version of Lightweight charts -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  </head>
+  
+  <body>
+  <!--CHART-->
+    <div id="container"></div>
+    
+    <!--ORDERS-->    
+    <!-- Batani ya kuwasha/kuzima Auto-Refresh -->
+    <div class="controls-container">
+        <button id="toggle-refresh-btn" class="toggle-btn active" onclick="toggleAutoRefresh()">
+            ⏸ STOP Auto-Update (7 sec)
+        </button>
+        <span class="status" id="last-updated">ORDERBOOK LOADING...</span>
+    </div>
+ 
+<div id="overflowT"
+<div style="display:flex; padding:3px;">
+<table style="width:50%; background: black; border: 1px solid red; margin-right: 2px; color:white;">
+     <thead>
+     <tr>
+     <th style="background:red;"></th>
+     <th style="background:red; color:white;"><center>ASKS</center></th>
+     <th style="background:red;"></th>
+     </tr>
+    <tr>
+    <th>Price (USD)</th>
+    <th><center>Qty</center></th>
+    <th>minutes</th>
+    </tr> 
+    </thead>
+    <tbody id="asks-body">
+  </table>  
+  
+  <!-- Bids Table (Kununua) -->
+  <table style="width:50%; background: black; border: 1px solid green; margin-left: 2px; color:white;">
+    <thead>
+     <tr>
+     <th style="background:green;"></th>
+     <th style="background:green; color:white;"><center>BIDS</center></th>
+     <th style="background:green;"></th>
+     </tr>
+    <tr>
+    <th>Price (USD)</th>
+    <th><center>Qty</center></th>
+    <th>minutes</th>
+    </tr> 
+    </thead>
+    <tbody id="bids-body">
+  </table> 
+  </div>
+  </div>
+ 
+    <!--GET PAIR FROM URL-->
+<script>
+const url = new URL(window.location.href);
+const pea = url.searchParams.get('pair');
+let coin = pea;
+if (coin) {
+    coin = coin.slice(0, -5);
+} 
+document.getElementById("coin").innerHTML = coin;
+document.getElementById("pea").value = pea ||'';
+</script>
+
+<!--CHART SCRIPTS-->
+<script src="b_chart_script.js"></script>
+
+ <!--LARGE ORDERS SCRIPT-->
+ <script src="large_orders.js" type="module"></script>
+
+  </body>
+</html>

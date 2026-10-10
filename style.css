@@ -1,0 +1,348 @@
+body {
+  background: grey;
+  fan-family: normal;
+} 
+
+#container {
+  background: black;
+  position: relative;
+  width: 100%;
+  height: 40vh; /* Badilisha 40vh kuwa fixed height mfano 300px au 350px */
+  flex-shrink: 0; /* Inazuia flexbox kuto-resize chart */
+  overflow: hidden;
+  display: flex; /* Badilisha kutoka flex kwenda block kama ndani ina chart pekee */
+}
+
+/* ORDERBOOK, FORM BODY */
+.bodi {
+  display: flex;
+  margin-bottom: 30px;
+} 
+
+/* ORDERBOOK */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.orderbook-container {
+  width: 100%;
+  background-color: #000000;
+  font-size: 13px;
+  padding: 3px;
+  border-radius: 12px;
+  margin-right: 2px;
+  margin-left: 2px;
+  user-select: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.ob-header {
+  display: flex;
+  justify-content: space-between;
+  color: #848e9c;
+  font-size: 11px;
+  padding: 6px 0;
+}
+
+.ob-row {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 22px;
+  line-height: 22px;
+  font-family: 'Roboto Mono', monospace, sans-serif;
+}
+
+.depth-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  transition: width 0.2s ease;
+}
+
+.ask-depth {
+  background-color: rgba(229, 63, 85, 0.18);
+}
+
+.bid-depth {
+  background-color: rgba(14, 203, 129, 0.18);
+}
+
+.price, .quantity {
+  position: relative;
+  z-index: 2;
+}
+
+.price {
+  font-weight: 500;
+}
+
+.ask-price {
+  color: #f6465d;
+}
+
+.bid-price {
+  color: #0ecb81;
+}
+
+.quantity {
+  color: #eaeaea;
+  text-align: right;
+}
+
+/* Last Price Bar */
+.last-price-container {
+  padding: 8px 0;
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.last-price {
+  font-size: 18px;
+  font-weight: bold;
+  color: #0ecb81;
+}
+
+.last-price-sub {
+  font-size: 12px;
+  color: #ffffff;
+}
+
+/* Buy/Sell Ratio Footer */
+.ratio-bar-container {
+  margin-top: 8px;
+  display: flex;
+  height: 20px;
+  border-radius: 2px;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 20px;
+}
+
+.buy-ratio {
+  background-color: #0ecb81;
+  color: #ffffff;
+  padding-left: 4px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.sell-ratio {
+  background-color: #f6465d;
+  color: #ffffff;
+  text-align: right;
+  padding-right: 4px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 3px;
+}
+
+.badge {
+  border: 1px solid rgba(255,255,255,0.4);
+  padding: 0 2px;
+  border-radius: 2px;
+  font-size: 9px;
+  display: inline-block;
+}
+
+/* dash_form_apis */
+.card { 
+  background: #1e2329; 
+  padding: 10px; 
+  border-radius: 12px; 
+  width: 50%; 
+  max-width: 400px; 
+  border: 1px solid #2b3139; 
+  margin-right: 2px;
+  overflow-y: auto;
+}
+
+label { 
+  display: block; 
+  margin: 12px 0 5px; 
+  font-size: 12px; 
+  color: #848e9c; 
+}
+
+input, select { 
+  width: 100%; 
+  padding: 7px; 
+  background: #2b3139; 
+  border: 1px solid #474d57; 
+  border-radius: 5px; 
+  color: white; 
+  box-sizing: border-box; 
+  margin-bottom: 5px; 
+}
+
+button { 
+  padding: 7px; 
+  margin-top: 20px; 
+  border: none;
+  cursor: pointer; 
+  background: #f0b90b; 
+  color: #000; 
+}
+
+button:disabled { 
+  background: #555; 
+  cursor: not-allowed; 
+}
+
+.success { 
+  background: rgba(14, 203, 129, 0.2); 
+  color: #0ecb81; 
+  padding: 10px; 
+  border-radius: 5px; 
+  margin-bottom: 10px; 
+  border: 1px solid #0ecb81; 
+  text-align: center; 
+}
+
+.error { 
+  background: rgba(246, 70, 93, 0.2); 
+  color: #f6465d; 
+  padding: 10px; 
+  border-radius: 5px; 
+  margin-bottom: 10px; 
+  border: 1px solid #f6465d; 
+  text-align: center; 
+}
+
+.hidden { 
+  display: none; 
+}
+
+/*LARGE ORDERS*/
+.bodiy {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #12161c;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 15px;
+}
+
+h2 {
+  text-align: center;
+  color: #f0b90b;
+  margin-bottom: 5px;
+}
+
+.status {
+  text-align: center;
+  font-size: 13px;
+  color: blue;
+  margin-bottom: 2px;
+}
+
+/* Mtindo wa sehemu ya Batani */
+.controls-container {
+  text-align: left;
+  margin-left: 6px;
+  margin-bottom: 2px;
+}
+
+.toggle-btn {
+  background-color: #f6465d;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-btn.active {
+  background-color: #0ecb81;
+  color: #000;
+}
+
+.toggle-btn:hover {
+  opacity: 0.9;
+}
+
+.table-wrapper {
+  flex: 1;
+  min-width: 280px;
+  max-width: 600px;
+  background-color: #1e2329;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.table-title {
+  font-size: 16px;
+  font-weight: bold;
+  padding: 8px;
+  margin-bottom: 5px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.asks-title { color: #f6465d; background-color: rgba(246, 70, 93, 0.1); }
+.bids-title { color: #0ecb81; background-color: rgba(14, 203, 129, 0.1); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  padding: 8px 6px;
+  text-align: right;
+}
+
+th {
+  color: #848e9c;
+  border-bottom: 1px solid #2b313a;
+  font-weight: 500;
+}
+
+th:first-child, td:first-child { text-align: left; }
+
+tr:nth-child(even) { background-color: #181a20; }
+tr:hover { background-color: #2b313a; }
+
+.price-ask { color: #f6465d; font-weight: bold; }
+.price-bid { color: #0ecb81; font-weight: bold; }
+
+.badge-okx { background-color: #353945; color: #ffffff; }
+.badge-binance { background-color: #f0b90b; color: #000000; }
+.badge-coinbase { background-color: #0052ff; color: #ffffff; }
+
+#overflowT {
+  background: transparent;
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.spread-divider {
+    text-align: center;
+    padding: 8px 0;
+    margin: 5px 0;
+    background-color: #1e2329;
+    color: #848e9c;
+    font-size: 0.85rem;
+    font-weight: bold;
+    border-top: 1px dashed #363c4e;
+    border-bottom: 1px dashed #363c4e;
+}
