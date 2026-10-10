@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binance Futures USDC Wallet</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #12161c;
+      color: #eaecef;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background-color: #1e2329;
+      border-radius: 8px;
+      padding: 24px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    h2 {
+      margin-top: 0;
+      color: #f0b90b;
+      font-size: 20px;
+      text-align: center;
+      border-bottom: 1px solid #2b313a;
+      padding-bottom: 12px;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      background: #2b313a;
+    }
+    .connected { color: #0ecb81; }
+    .disconnected { color: #f6465d; }
+    
+    .balance-box {
+      background-color: #2b313a;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .balance-title {
+      font-size: 12px;
+      color: #848e9c;
+      margin-bottom: 4px;
+    }
+    .balance-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: #f0b90b;
+    }
+    
+    .symbol-input-group {
+      margin-top: 12px;
+      margin-bottom: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .symbol-input-group label {
+      font-size: 12px;
+      color: #848e9c;
+    }
+    .symbol-input-group input {
+      background: #2b313a;
+      border: 1px solid #363c4e;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      width: 120px;
+      text-transform: uppercase;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: bold;
+      background-color: #f0b90b;
+      color: #000;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    #logOutput {
+      margin-top: 16px;
+      background-color: #0b0e11;
+      border: 1px solid #2b313a;
+      border-radius: 4px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #848e9c;
+      max-height: 120px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    /* Styles za Sehemu ya Pending Orders */
+    .orders-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #f0b90b;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      border-top: 1px dashed #2b313a;
+      padding-top: 12px;
+    }
+    .order-card {
+      background-color: #2b313a;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border-left: 4px solid #f0b90b;
+    }
+    .order-card.buy { border-left-color: #0ecb81; }
+    .order-card.sell { border-left-color: #f6465d; }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .order-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #848e9c;
+    }
+    .order-val {
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Binance Futures Wallet</h2>
+  
+  <div style="text-align: center;">
+    <span id="connectionStatus" class="status-badge disconnected">● Inajiunga...</span>
+  </div>
+
+  <div id="balancesContainer">
+    <div class="balance-box">
+      <div class="balance-title">Jumla ya Salio (Wallet Balance)</div>
+      <div class="balance-value">0.00 USDC</div>
+    </div>
+  </div>
+
+  <!-- SEHEMU YA PENDING ORDERS -->
+  <div class="orders-title">Pending Orders (Oda za Kusubiri)</div>
+  
+  <div class="symbol-input-group">
+    <label for="symbolInput">Pair / Symbol:</label>
+    <input type="text" id="symbolInput" value="SOLUSDC" placeholder="SOLUSDC">
+  </div>
+
+  <div id="ordersContainer">
+    <div style="text-align:center; color:#848e9c; font-size:12px; padding:10px;">Inasoma Pending Orders...</div>
+  </div>
+
+  <button id="fetchBtn">Omba Salio na Oda</button>
+
+  <pre id="logOutput">Inasubiri kuunganishwa...</pre>
+</div>
+
+<script>
+  const API_KEY = 'FrK30aNhbasA9VRgMLCRIF6lF9tl8VMrW8csINQurVGuaPWFK7Ir8tQvNX7PkuV2';
+  const API_SECRET = '745JBvQU5gttAWsSzhVrhh7SlvAcQzE1gHb9brSX7p8J7ycHpxNoMa5nQPIHWHHI';
+
+  const WS_URL = 'wss://ws-fapi.binance.com/ws-fapi/v1';
+  let ws = null;
+  let autoRefreshTimer = null;
+
+  const statusBadge = document.getElementById('connectionStatus');
+  const logOutput = document.getElementById('logOutput');
+  const balancesContainer = document.getElementById('balancesContainer');
+  const ordersContainer = document.getElementById('ordersContainer');
+  const symbolInput = document.getElementById('symbolInput');
+  const fetchBtn = document.getElementById('fetchBtn');
+
+  function log(msg) {
+    const time = new Date().toLocaleTimeString();
+    logOutput.textContent = `[${time}] ${msg}\n` + logOutput.textContent;
+  }
+
+  // Signature HMAC SHA-256
+  async function generateHMACSignature(secret, queryString) {
+    const encoder = new TextEncoder();
+    const cryptoKey = await window.crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signature = await window.crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(queryString));
+    return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function connectWebSocket() {
+    ws = new WebSocket(WS_URL);
+
+    ws.onopen = () => {
+      statusBadge.textContent = '● Imeunganishwa (Live Refresh)';
+      statusBadge.className = 'status-badge connected';
+      log('Umeunganishwa na WebSocket API.');
+      
+      getAccountBalance();
+      fetchPendingOrdersREST();
+
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      autoRefreshTimer = setInterval(() => {
+        getAccountBalance();
+        fetchPendingOrdersREST();
+      }, 3000);
+    };
+
+    ws.onmessage = (event) => {
+      const response = JSON.parse(event.data);
+
+      if (response.status === 200 && response.result !== undefined) {
+        if (response.id && response.id.startsWith('bal_req_')) {
+          displayBalances(response.result);
+        }
+      } else if (response.status && response.status !== 200) {
+        log(`❌ Kosa (${response.status}): ${response.error ? response.error.msg : 'Imefeli'}`);
+      }
+    };
+
+    ws.onerror = () => {
+      log('Kosa la WebSocket.');
+    };
+
+    ws.onclose = () => {
+      statusBadge.textContent = '● Imekatika';
+      statusBadge.className = 'status-badge disconnected';
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      setTimeout(connectWebSocket, 3000);
+    };
+  }
+
+  // Omba salio kupitia WebSocket RPC
+  async function getAccountBalance() {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+    const params = {
+      apiKey: API_KEY,
+      timestamp: Date.now()
+    };
+
+    const sortedKeys = Object.keys(params).sort();
+    const queryString = sortedKeys.map(key => `${key}=${params[key]}`).join('&');
+    const signature = await generateHMACSignature(API_SECRET, queryString);
+    params.signature = signature;
+
+    const payload = {
+      id: `bal_req_${Date.now()}`,
+      method: 'v2/account.balance',
+      params: params
+    };
+
+    ws.send(JSON.stringify(payload));
+  }
+
+  // Kuchukua Open Orders kwa uhakika kwa njia ya REST Endpoint (`/fapi/v1/openOrders`)
+  async function fetchPendingOrdersREST() {
+    try {
+      const symbol = (symbolInput.value || 'SOLUSDC').trim().toUpperCase();
+      const timestamp = Date.now();
+      const queryString = `symbol=${symbol}&timestamp=${timestamp}`;
+      const signature = await generateHMACSignature(API_SECRET, queryString);
+
+      const url = `https://fapi.binance.com/fapi/v1/openOrders?${queryString}&signature=${signature}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'X-MBX-APIKEY': API_KEY
+        }
+      });
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        displayPendingOrders(data);
+      } else if (data.msg) {
+        log(`❌ REST API Error: ${data.msg}`);
+      }
+    } catch (err) {
+      log(`❌ Kosa la Mtandao/REST: ${err.message}`);
+    }
+  }
+
+  function displayBalances(balanceData) {
+    if (!Array.isArray(balanceData)) return;
+
+    const activeBalances = balanceData.filter(b => parseFloat(b.balance || b.wb || 0) > 0);
+
+    if (activeBalances.length === 0) {
+      balancesContainer.innerHTML = `
+        <div class="balance-box">
+          <div class="balance-title">Jumla ya Salio (Wallet Balance)</div>
+          <div class="balance-value">0.00 USDC / USDT</div>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+    activeBalances.forEach(b => {
+      const assetName = b.asset;
+      const walletBal = parseFloat(b.balance || b.wb || 0).toFixed(2);
+
+      html += `
+        <div class="balance-box">
+          <div class="balance-title">Salio la Wallet (${assetName})</div>
+          <div class="balance-value">${walletBal} ${assetName}</div>
+        </div>
+      `;
+    });
+
+    balancesContainer.innerHTML = html;
+  }
+
+  // Onyesha Pending Orders
+  function displayPendingOrders(ordersData) {
+    if (!Array.isArray(ordersData) || ordersData.length === 0) {
+      ordersContainer.innerHTML = `<div style="text-align:center; color:#848e9c; font-size:12px; padding:10px;">Huna Oda yoyote inayosubiri kwenye pair hii.</div>`;
+      return;
+    }
+
+    let html = '';
+    ordersData.forEach(ord => {
+      const isBuy = ord.side === 'BUY';
+      const sideColor = isBuy ? '#0ecb81' : '#f6465d';
+      const price = parseFloat(ord.price || ord.stopPrice || 0).toFixed(4);
+      const qty = parseFloat(ord.origQty || ord.qty || 0);
+
+      html += `
+        <div class="order-card ${isBuy ? 'buy' : 'sell'}">
+          <div class="order-header">
+            <span>${ord.symbol} <small style="color:${sideColor};">${ord.side} (${ord.type})</small></span>
+            <span style="color:#f0b90b;">${ord.status || 'NEW'}</span>
+          </div>
+          <div class="order-row">
+            <span>Bei (Price):</span>
+            <span class="order-val">${price}</span>
+          </div>
+          <div class="order-row">
+            <span>Kiasi (Qty):</span>
+            <span class="order-val">${qty}</span>
+          </div>
+        </div>
+      `;
+    });
+
+    ordersContainer.innerHTML = html;
+  }
+
+  fetchBtn.addEventListener('click', () => {
+    log('Inatuma ombi la kuchukua salio na oda za ' + symbolInput.value.toUpperCase() + '...');
+    getAccountBalance();
+    fetchPendingOrdersREST();
+  });
+
+  connectWebSocket();
+</script>
+
+</body>
+</html>

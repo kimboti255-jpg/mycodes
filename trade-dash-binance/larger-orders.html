@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combined Live Order Book</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #12161c;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 15px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #f0b90b;
+            margin-bottom: 5px;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 13px;
+            color: #848e9c;
+            margin-bottom: 10px;
+        }
+
+        /* Mtindo wa sehemu ya Batani */
+        .controls-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            background-color: #f6465d;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .toggle-btn.active {
+            background-color: #0ecb81;
+            color: #000;
+        }
+
+        .toggle-btn:hover {
+            opacity: 0.9;
+        }
+
+        .orderbook-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .table-wrapper {
+            flex: 1;
+            min-width: 320px;
+            max-width: 600px;
+            background-color: #1e2329;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .table-title {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px;
+            margin-bottom: 5px;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .asks-title { color: #f6465d; background-color: rgba(246, 70, 93, 0.1); }
+        .bids-title { color: #0ecb81; background-color: rgba(14, 203, 129, 0.1); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 8px 6px;
+            text-align: right;
+        }
+
+        th {
+            color: #848e9c;
+            border-bottom: 1px solid #2b313a;
+            font-weight: 500;
+        }
+
+        th:first-child, td:first-child { text-align: left; }
+
+        tr:nth-child(even) { background-color: #181a20; }
+        tr:hover { background-color: #2b313a; }
+
+        .price-ask { color: #f6465d; font-weight: bold; }
+        .price-bid { color: #0ecb81; font-weight: bold; }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-okx { background-color: #353945; color: #ffffff; }
+        .badge-binance { background-color: #f0b90b; color: #000000; }
+        .badge-coinbase { background-color: #0052ff; color: #ffffff; }
+        #overflowTest {
+  background: green;
+  color: white;
+  padding: 15px;
+  width: 100%;
+  height: 500px;
+  overflow: scroll;
+  border: 1px solid #ccc;
+}
+    </style>
+</head>
+<body>
+
+    <div class="status" id="last-updated">Inapakia data...</div>
+
+    <!-- Batani ya kuwasha/kuzima Auto-Refresh -->
+    <div class="controls-container">
+        <button id="toggle-refresh-btn" class="toggle-btn active" onclick="toggleAutoRefresh()">
+            ⏸ Zima Auto-Update (Sekunde 7)
+        </button>
+    </div>
+
+    <div id="overflowTest">
+    <div class="orderbook-container">
+        <!-- Asks Table (Kuuza) -->
+        <div class="table-wrapper">
+            <div class="table-title asks-title">ASKS (Oda za Kuuza)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Exchange</th>
+                        <th>Bei (USD)</th>
+                        <th>Kiwango</th>
+                        <th>Thamani</th>
+                        <th>Muda (Min)</th>
+                    </tr>
+                </thead>
+                <tbody id="asks-body">
+                    <tr><td colspan="5" style="text-align:center;">Inasubiri data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+       
+       <div id="center"></div>
+ 
+
+        <!-- Bids Table (Kununua) -->
+        <div class="table-wrapper">
+            <div class="table-title bids-title">BIDS (Oda za Kununua)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Exchange</th>
+                        <th>Bei (USD)</th>
+                        <th>Kiwango</th>
+                        <th>Thamani</th>
+                        <th>Muda (Min)</th>
+                    </tr>
+                </thead>
+                <tbody id="bids-body">
+                    <tr><td colspan="5" style="text-align:center;">Inasubiri data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+ </div>
+
+    <script>
+        // Orodha ya API endpoints na majina ya exchange
+        const apiEndpoints = [
+            { name: 'OKX', url: 'https://simotz255-odakubwa.hf.space/okx_fetch.php' },
+            { name: 'Binance', url: 'https://simotz255-odakubwa.hf.space/binance_fetch.php' },
+            { name: 'Coinbase', url: 'https://simotz255-odakubwa.hf.space/coinbase_fetch.php' }
+        ];
+
+        let autoRefreshInterval = null;
+        let isAutoRefreshActive = true;
+
+        async function fetchOrderBookData() {
+            let allBids = [];
+            let allAsks = [];
+
+            // Kuvuta data kutoka API zote kwa pamoja
+            const fetchPromises = apiEndpoints.map(async (endpoint) => {
+                try {
+                    const response = await fetch(endpoint.url);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+
+                    // Kuongeza jina la exchange kwenye kila oda
+                    if (data.bids && Array.isArray(data.bids)) {
+                        data.bids.forEach(bid => {
+                            bid.exchange = endpoint.name;
+                            allBids.push(bid);
+                        });
+                    }
+
+                    if (data.asks && Array.isArray(data.asks)) {
+                        data.asks.forEach(ask => {
+                            ask.exchange = endpoint.name;
+                            allAsks.push(ask);
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Kosa wakati wa kuvuta data kutoka ${endpoint.name}:`, error);
+                }
+            });
+
+            await Promise.allSettled(fetchPromises);
+
+            // Upangaji (Sorting)
+            // 1. Bids (Kununua): Bei ya juu kwenda ya chini (Descending)
+            allBids.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+
+            // 2. Asks (Kuuza): Bei ya chini kwenda ya juu (Ascending)
+            allAsks.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+
+            // Kuonyesha data kwenye HTML
+            renderTable('bids-body', allBids, 'price-bid');
+            renderTable('asks-body', allAsks, 'price-ask');
+
+            // Kusasisha muda wa mwisho wa Fetch
+            const now = new Date();
+            const statusText = isAutoRefreshActive ? '(Inajirudia kila sekunde 7)' : '(Auto-update imezimwa)';
+            document.getElementById('last-updated').innerText = 
+                `Ilisasishwa mwisho: ${now.toLocaleTimeString()} ${statusText}`;
+        }
+
+        function renderTable(elementId, items, priceClass) {
+            const tbody = document.getElementById(elementId);
+
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Hakuna data iliyopatikana.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = items.map(item => {
+                // Kuweka mtindo wa lebo ya exchange
+                const exchangeBadge = `<span class="badge badge-${item.exchange.toLowerCase()}">${item.exchange}</span>`;
+
+                // Kuweka vizuri muda iliyodumu oda
+                let duration = item.duration_minutes !== undefined ? item.duration_minutes : 0;
+                duration = typeof duration === 'number' ? duration.toFixed(1) : duration;
+
+                return `
+                    <tr>
+                        <td>${exchangeBadge}</td>
+                        <td class="${priceClass}">${parseFloat(item.price).toLocaleString('en-US', {minimumFractionDigits: 1})}</td>
+                        <td>${parseFloat(item.amount).toFixed(4)}</td>
+                        <td>${item.value_formatted || ('$' + parseFloat(item.value).toLocaleString('en-US'))}</td>
+                        <td>${duration} min</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Mfumo wa kudhibiti Auto-Refresh kupitia batani
+        function toggleAutoRefresh() {
+            const btn = document.getElementById('toggle-refresh-btn');
+
+            if (isAutoRefreshActive) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                isAutoRefreshActive = false;
+
+                btn.innerText = '▶ Anzisha Auto-Update (Sekunde 7)';
+                btn.classList.remove('active');
+            } else {
+                fetchOrderBookData(); // Kuvuta mara moja papo hapo unaponyeza
+                autoRefreshInterval = setInterval(fetchOrderBookData, 7000);
+                isAutoRefreshActive = true;
+
+                btn.innerText = '⏸ Zima Auto-Update (Sekunde 7)';
+                btn.classList.add('active');
+            }
+        }
+
+        // Kuvuta data mara ya kwanza ukurasa unapofunguka
+        fetchOrderBookData();
+
+        // Kujirudia kuvuta data kila baada ya sekunde 7 (7000 ms)
+        autoRefreshInterval = setInterval(fetchOrderBookData, 7000);
+    </script>
+</body>
+</html>

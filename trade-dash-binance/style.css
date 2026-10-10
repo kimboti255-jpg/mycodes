@@ -1,0 +1,680 @@
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+   .bodyi {
+      background-color: #12161c;
+      color: #eaecef;
+      display: flex;    
+      padding: 10px;
+    }
+
+#container {
+  position: relative;
+  width: 100%;
+  height: 40vh; /* Badilisha 40vh kuwa fixed height mfano 300px au 350px */
+  flex-shrink: 0; /* Inazuia flexbox kuto-resize chart */
+  overflow: hidden;
+  display: flex; /* Badilisha kutoka flex kwenda block kama ndani ina chart pekee */
+}
+
+    .terminal-container {
+      width: 100%;
+      max-width: 280px;
+      background-color: #181a20;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    /* Top Pair Header */
+    .pair-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .pair-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .pair-badge {
+      background-color: #2b313a;
+      color: #848e9c;
+      font-size: 10px;
+      padding: 2px 4px;
+      border-radius: 2px;
+    }
+
+    .pair-change {
+      color: #f6465d;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    /* Margin & Leverage Controls */
+    .control-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .btn-ctrl {
+      background-color: #2b313a;
+      color: #eaecef;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      flex: 1;
+      text-align: center;
+    }
+
+    .btn-ctrl-sm {
+      flex: 0 0 32px;
+    }
+
+    /* Open / Close Main Tabs */
+    .mode-tabs {
+      display: flex;
+      background-color: #2b313a;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .mode-tab {
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #848e9c;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+    }
+
+    .mode-tab.active-open-buy {
+      background-color: #0ecb81;
+      color: #ffffff;
+      clip-path: polygon(0 0, 85% 0, 100% 100%, 0% 100%);
+    }
+
+    .mode-tab.active-open-sell {
+      background-color: #f6465d;
+      color: #ffffff;
+      clip-path: polygon(0 0, 85% 0, 100% 100%, 0% 100%);
+    }
+
+    .mode-tab.active-close {
+      background-color: #2b313a;
+      color: #ffffff;
+    }
+
+    /* Balance Row */
+    .balance-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #848e9c;
+      margin-bottom: 8px;
+    }
+
+    .balance-val {
+      color: #eaecef;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .plus-icon {
+      color: #f0b90b;
+      font-weight: bold;
+    }
+
+    /* Order Type Selector */
+    .order-type-select {
+      width: 100%;
+      background-color: #2b313a;
+      color: #eaecef;
+      border: none;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-bottom: 8px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Input Field Groups */
+    .input-group {
+      background-color: #2b313a;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding: 4px 8px;
+      margin-bottom: 8px;
+    }
+
+    .input-btn {
+      background: none;
+      border: none;
+      color: #848e9c;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+
+    .input-box {
+      flex: 1;
+      text-align: center;
+    }
+
+    .input-box label {
+      display: block;
+      font-size: 9px;
+      color: #848e9c;
+    }
+
+    .input-box input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .unit-btn {
+      background: none;
+      border: none;
+      color: #848e9c;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .bbo-btn {
+      background-color: #363c4e;
+      color: #eaecef;
+      border: none;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-left: 6px;
+      cursor: pointer;
+    }
+
+    /* Slider Container */
+    .slider-container {
+      margin: 14px 0;
+      position: relative;
+    }
+
+    .slider {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 2px;
+      background: #2b313a;
+      outline: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      transform: rotate(45deg);
+      background: #848e9c;
+      cursor: pointer;
+      border: 2px solid #181a20;
+    }
+
+    /* Checkboxes & GTC Row */
+    .options-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: #848e9c;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .checkbox-label input {
+      accent-color: #f0b90b;
+    }
+
+    .gtc-select {
+      background: transparent;
+      color: #848e9c;
+      border: none;
+      font-size: 11px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Info Lines (Max & Cost) */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #848e9c;
+      margin-bottom: 4px;
+    }
+
+    .info-val {
+      color: #eaecef;
+    }
+
+    /* Action Submit Button */
+    .submit-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      cursor: pointer;
+      margin-top: 8px;
+      margin-bottom: 16px;
+    }
+
+    .btn-buy {
+      background-color: #0ecb81;
+    }
+
+    .btn-sell {
+      background-color: #f6465d;
+    }
+
+    /* Bottom Section Header Tabs */
+    .bottom-tabs {
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid #2b313a;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+    }
+
+    .bottom-tab {
+      font-size: 12px;
+      font-weight: 600;
+      color: #848e9c;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .bottom-tab.active {
+      color: #eaecef;
+    }
+
+    .bottom-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -7px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #f0b90b;
+    }
+
+    .hide-pairs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: #848e9c;
+      margin-bottom: 12px;
+    }
+
+    /* Position Card */
+    .position-card {
+      background-color: #181a20;
+      border-top: 1px solid #2b313a;
+      padding-top: 10px;
+    }
+
+    .pos-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .pos-badge {
+      background-color: #0ecb81;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 1px 3px;
+      border-radius: 2px;
+    }
+
+    .pos-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .pos-tags {
+      font-size: 9px;
+      color: #848e9c;
+      background-color: #2b313a;
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    .pnl-section {
+      margin-bottom: 10px;
+    }
+
+    .pnl-label {
+      font-size: 10px;
+      color: #848e9c;
+      border-bottom: 1px dashed #848e9c;
+      display: inline-block;
+    }
+
+    .pnl-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #f6465d;
+      margin-top: 2px;
+    }
+
+    .pos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      row-gap: 8px;
+      font-size: 10px;
+      margin-bottom: 12px;
+    }
+
+    .grid-item label {
+      color: #848e9c;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .grid-item span {
+      color: #eaecef;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .pos-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pos-btn {
+      flex: 1;
+      background-color: #2b313a;
+      color: #eaecef;
+      border: none;
+      padding: 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+   
+   /* Position Card */
+.position-card {
+  background-color: #181a20;
+  border-top: 1px solid #2b313a;
+  padding-top: 10px;
+}
+
+.pos-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.pos-badge {
+  background-color: #0ecb81;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.pos-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.pos-tags {
+  font-size: 9px;
+  color: #848e9c;
+  background-color: #2b313a;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.pnl-section {
+  margin-bottom: 10px;
+}
+
+.pnl-label {
+  font-size: 10px;
+  color: #848e9c;
+  border-bottom: 1px dashed #848e9c;
+  display: inline-block;
+}
+
+.pnl-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #f6465d;
+  margin-top: 2px;
+}
+
+.pos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 8px;
+  font-size: 10px;
+  margin-bottom: 12px;
+}
+
+.grid-item label {
+  color: #848e9c;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.grid-item span {
+  color: #eaecef;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.pos-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pos-btn {
+  flex: 1;
+  background-color: #2b313a;
+  color: #eaecef;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+}
+
+/*ORDERBOOK*/
+    bodiyi {
+      background-color: #12161c;
+      color: #848e9c;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 70vh;
+    }
+
+    .order-book {
+      width: 230px;
+      background-color: #12161c;
+      padding: 12px 10px;
+      font-size: 12px;
+      user-select: none;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      color: #848e9c;
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+
+    .header-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-col.right {
+      align-items: flex-end;
+    }
+
+    /* Rows Container */
+    .rows-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 20px;
+      position: relative;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .depth-bar {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      z-index: 1;
+      opacity: 0.18;
+    }
+
+    .asks .depth-bar {
+      background-color: #f6465d;
+    }
+
+    .bids .depth-bar {
+      background-color: #0ecb81;
+    }
+
+    .price, .amount {
+      z-index: 2;
+    }
+
+    .asks .price {
+      color: #f6465d;
+    }
+
+    .bids .price {
+      color: #0ecb81;
+    }
+
+    .amount {
+      color: #eaedd1;
+      font-weight: 400;
+    }
+
+    /* Middle Price display */
+    .mark-price-container {
+      padding: 10px 0;
+      text-align: center;
+    }
+
+    .mark-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0ecb81;
+      line-height: 1.2;
+    }
+
+    .index-price {
+      font-size: 12px;
+      color: #848e9c;
+      text-decoration: underline dotted;
+      margin-top: 2px;
+    }
+
+    /* Ratio Bar at bottom */
+    .ratio-container {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ratio-values {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .bid-pct {
+      color: #0ecb81;
+    }
+
+    .ask-pct {
+      color: #f6465d;
+    }
+
+    .ratio-bar {
+      height: 4px;
+      width: 100%;
+      display: flex;
+      border-radius: 2px;
+      overflow: hidden;
+      gap: 2px;
+    }
+
+    .bid-fill {
+      background-color: #0ecb81;
+      height: 100%;
+    }
+
+    .ask-fill {
+      background-color: #f6465d;
+      height: 100%;
+    }

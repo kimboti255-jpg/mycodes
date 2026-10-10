@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binance Futures Order Book (Auto Reconnect)</title>
+  <style>
+
+    body {
+      background-color: #12161c;
+      color: #848e9c;
+      display: flex;                  
+    }
+
+    .order-book {
+      width: 280px;
+      background-color: #12161c;
+      font-size: 12px;   
+    }
+
+    /* Connection Status Banner */
+    .status-banner {
+      display: none;
+      background-color: #f6465d;
+      color: #ffffff;
+      text-align: center;
+      padding: 4px;
+      font-size: 10px;
+      border-radius: 2px;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      color: #848e9c;
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+
+    .header-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-col.right {
+      align-items: flex-end;
+    }
+
+    /* Rows Container */
+    .rows-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 20px;
+      position: relative;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .depth-bar {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      z-index: 1;
+      opacity: 0.18;
+    }
+
+    .asks .depth-bar {
+      background-color: #f6465d;
+    }
+
+    .bids .depth-bar {
+      background-color: #0ecb81;
+    }
+
+    .price, .amount {
+      z-index: 2;
+    }
+
+    .asks .price {
+      color: #f6465d;
+    }
+
+    .bids .price {
+      color: #0ecb81;
+    }
+
+    .amount {
+      color: #eaedd1;
+      font-weight: 400;
+    }
+
+    /* Middle Price display */
+    .mark-price-container {
+      padding: 10px 0;
+      text-align: center;
+    }
+
+    .mark-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0ecb81;
+      line-height: 1.2;
+    }
+
+    .index-price {
+      font-size: 12px;
+      color: #848e9c;
+      text-decoration: underline dotted;
+      margin-top: 2px;
+    }
+
+    /* Ratio Bar at bottom */
+    .ratio-container {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ratio-values {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .bid-pct {
+      color: #0ecb81;
+    }
+
+    .ask-pct {
+      color: #f6465d;
+    }
+
+    .ratio-bar {
+      height: 4px;
+      width: 100%;
+      display: flex;
+      border-radius: 2px;
+      overflow: hidden;
+      gap: 2px;
+    }
+
+    .bid-fill {
+      background-color: #0ecb81;
+      height: 100%;
+    }
+
+    .ask-fill {
+      background-color: #f6465d;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="order-book">
+  <!-- Indiketa ya status ikitokea network tatizo -->
+  <div id="status-banner" class="status-banner">Inajaribu kuunganisha tena...</div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-col">
+      <span>Price</span>
+      <span>(USDC)</span>
+    </div>
+    <div class="header-col right">
+      <span>Amount</span>
+      <span>(USDC)</span>
+    </div>
+  </div>
+
+  <!-- Asks (Sells) -->
+  <div id="asks" class="rows-container asks"></div>
+
+  <!-- Middle Price -->
+  <div class="mark-price-container">
+    <div id="mark-price" class="mark-price">--</div>
+    <div id="index-price" class="index-price">--</div>
+  </div>
+
+  <!-- Bids (Buys) -->
+  <div id="bids" class="rows-container bids"></div>
+
+  <!-- Ratio / Sentiment Bar -->
+  <div class="ratio-container">
+    <div class="ratio-values">
+      <span id="bid-pct" class="bid-pct">50.00%</span>
+      <span id="ask-pct" class="ask-pct">50.00%</span>
+    </div>
+    <div class="ratio-bar">
+      <div id="bid-fill" class="bid-fill" style="width: 50%;"></div>
+      <div id="ask-fill" class="ask-fill" style="width: 50%;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let ws = null;
+  let reconnectTimer = null;
+  const symbol = "solusdc";
+  const wsUrl = `wss://fstream.binance.com/ws/${symbol}@depth10@100ms`;
+
+  function formatAmount(val) {
+    const num = parseFloat(val);
+    if (num >= 1000) {
+      return (num / 1000).toFixed(2) + 'K';
+    }
+    return num.toFixed(2);
+  }
+
+  function connectWebSocket() {
+    ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log("WebSocket imeunganishwa kikamilifu.");
+      document.getElementById('status-banner').style.display = 'none';
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const asks = data.a;
+      const bids = data.b;
+
+      if (!asks || !bids) return;
+
+      const topAsks = asks.slice(0, 6).reverse();
+      const topBids = bids.slice(0, 6);
+
+      let totalAskVol = topAsks.reduce((acc, curr) => acc + parseFloat(curr[1]), 0);
+      let totalBidVol = topBids.reduce((acc, curr) => acc + parseFloat(curr[1]), 0);
+
+      // Render Asks
+      let asksHtml = '';
+      let currentAskSum = totalAskVol;
+      topAsks.forEach(([price, amount]) => {
+        const depthPct = (currentAskSum / totalAskVol) * 100;
+        asksHtml += `
+          <div class="row">
+            <div class="depth-bar" style="width: ${depthPct}%;"></div>
+            <span class="price">${parseFloat(price).toFixed(2)}</span>
+            <span class="amount">${formatAmount(amount)}</span>
+          </div>
+        `;
+        currentAskSum -= parseFloat(amount);
+      });
+      document.getElementById('asks').innerHTML = asksHtml;
+
+      // Render Bids
+      let bidsHtml = '';
+      let currentBidSum = 0;
+      topBids.forEach(([price, amount]) => {
+        currentBidSum += parseFloat(amount);
+        const depthPct = (currentBidSum / totalBidVol) * 100;
+        bidsHtml += `
+          <div class="row">
+            <div class="depth-bar" style="width: ${depthPct}%;"></div>
+            <span class="price">${parseFloat(price).toFixed(2)}</span>
+            <span class="amount">${formatAmount(amount)}</span>
+          </div>
+        `;
+      });
+      document.getElementById('bids').innerHTML = bidsHtml;
+
+      // Middle Prices
+      const currentPrice = parseFloat(topAsks[topAsks.length - 1][0]).toFixed(2);
+      document.getElementById('mark-price').innerText = currentPrice;
+      document.getElementById('index-price').innerText = (parseFloat(currentPrice) - 0.01).toFixed(2);
+
+      // Buy/Sell Ratio
+      const grandTotal = totalBidVol + totalAskVol;
+      if (grandTotal > 0) {
+        const bidRatio = ((totalBidVol / grandTotal) * 100).toFixed(2);
+        const askRatio = (100 - bidRatio).toFixed(2);
+
+        document.getElementById('bid-pct').innerText = `${bidRatio}%`;
+        document.getElementById('ask-pct').innerText = `${askRatio}%`;
+        document.getElementById('bid-fill').style.width = `${bidRatio}%`;
+        document.getElementById('ask-fill').style.width = `${askRatio}%`;
+      }
+    };
+
+    // Mfumo wa kutambua disconnection au error
+    ws.onclose = () => {
+      console.warn("WebSocket imekatika! Inajaribu kuunganisha tena...");
+      document.getElementById('status-banner').style.display = 'block';
+      scheduleReconnect();
+    };
+
+    ws.onerror = (err) => {
+      console.error("WebSocket Error:", err);
+      ws.close(); // Inalazimisha kufunga ili `onclose` ijiendeshe na kuanzisha reconnect logic
+    };
+  }
+
+  function scheduleReconnect() {
+    if (!reconnectTimer) {
+      reconnectTimer = setTimeout(() => {
+        connectWebSocket();
+      }, 3000); // Inajaribu tena kila baada ya sekunde 3
+    }
+  }
+
+  // Pia inasikiliza mfumo wa Browser internet status (Online/Offline event)
+  window.addEventListener('online', () => {
+    console.log("Internet imerudi, inajiunganisha maramoja...");
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      connectWebSocket();
+    }
+  });
+
+  // Anzisha connection mara ya kwanza
+  connectWebSocket();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <link rel='stylesheet' href='style.css'>
+    <title>Lightweight Charts™ Customization Tutorial</title>
+    <!-- Adding the standalone version of Lightweight charts -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  </head>
+  
+  <body>
+  <!--CHART-->
+    <div id="container"></div>
+        <!--GET PAIR FROM URL-->
+<script>
+const url = new URL(window.location.href);
+const pea = url.searchParams.get('pair');
+let coin = pea;
+if (coin) {
+    coin = coin.slice(0, -5);
+} 
+document.getElementById("coin").innerHTML = coin;
+document.getElementById("pea").value = pea ||'';
+</script>
+<!--CHART SCRIPTS-->
+<script src="b_chart_script.js" type="module"></script>
+
+<div class="bodyi">
+<div class="terminal-container">
+
+  <!-- Top Pair Info -->
+  <div class="pair-header">
+    <span class="pair-title" id="coin"></span>
+    <span class="pair-badge">Perp</span>
+    <span style="font-size: 10px; color: #848e9c;">▼</span>
+  </div>
+  <div class="pair-change" id="headerChange">0.00%</div>
+
+  <!-- Margin Mode & Leverage Controls -->
+  <div class="control-row">
+    <button class="btn-ctrl" id="marginBtn">Cross</button>
+
+<button class="btn-ctrl" id="leverageBtn" onclick="changeLeverage()">23x</button>
+
+    <button class="btn-ctrl btn-ctrl-sm">S</button>
+  </div>
+
+  <!-- Buy / Sell Mode Switch -->
+  <div class="mode-tabs">
+    <button class="mode-tab active-open-buy" id="tabBuy" onclick="switchMode('buy')">Buy</button>
+    <button class="mode-tab" id="tabSell" onclick="switchMode('sell')">Sell</button>
+  </div>
+
+  <!-- Balance Line -->
+  <div class="balance-row">
+    <span>Avbl</span>
+    <span class="balance-val" id="avblBalance">0.00 USDC <span class="plus-icon">+</span></span>
+  </div>
+
+  <!-- Order Type Selector -->
+  <select class="order-type-select" id="orderType" onchange="handleOrderTypeChange()">
+    <option value="limit">Limit</option>
+    <option value="market">Market</option>
+    <option value="conditional">Conditional (Stop Limit)</option>
+  </select>
+
+  <!-- Trigger Input -->
+  <div class="input-group" id="triggerGroup" style="display: none;">
+    <button class="input-btn" type="button" onclick="adjustValue('triggerInput', -0.01)">-</button>
+    <div class="input-box">
+      <label>Trigger Price (USDC)</label>
+      <input type="text" id="triggerInput" value="0.00">
+    </div>
+    <button class="input-btn" type="button" onclick="adjustValue('triggerInput', 0.01)">+</button>
+  </div>
+
+  <!-- Price Input Field -->
+  <div class="input-group" id="priceGroup" style="display: flex;">
+    <button class="input-btn" type="button" onclick="adjustValue('priceInput', -0.01)">-</button>
+    <div class="input-box">
+      <label>Price (USDC)</label>
+      <input type="text" id="priceInput" value="0.00">
+    </div>
+    <button class="input-btn" type="button" onclick="adjustValue('priceInput', 0.01)">+</button>
+    <button class="bbo-btn" type="button">BBO</button>
+  </div>
+
+  <!-- Amount Input Field -->
+  <div class="input-group">
+    <button class="input-btn" type="button" onclick="adjustValue('amountInput', -1)">-</button>
+    <div class="input-box">
+      <label>Amount</label>
+      <input type="text" id="amountInput" placeholder="0">
+    </div>
+    <button class="input-btn" type="button" onclick="adjustValue('amountInput', 1)">+</button>
+    <button class="unit-btn" type="button">USDC ▼</button>
+  </div>
+
+  <!-- Percentage Slider -->
+  <div class="slider-container">
+    <input type="range" class="slider" min="0" max="100" value="0" id="percentSlider" oninput="calculateAmountFromSlider()">
+  </div>
+
+  <!-- Order Options -->
+  <div id="openOptions">
+    <div class="options-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="tpslCheck"> TP/SL
+      </label>
+    </div>
+    <div class="options-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="reduceOnlyCheck" onchange="handleReduceOnlyChange()"> Reduce-Only
+      </label>
+      <select class="gtc-select">
+        <option value="GTC">GTC</option>
+        <option value="IOC">IOC</option>
+        <option value="FOK">FOK</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Max & Cost Calculations -->
+  <div class="info-row">
+    <span>Max</span>
+    <span class="info-val" id="maxVal">0.00 USDC</span>
+  </div>
+  <div class="info-row">
+    <span>Cost</span>
+    <span class="info-val" id="costVal">0.00 USDC</span>
+  </div>
+
+  <!-- Submit Button -->
+  <button class="submit-btn btn-buy" id="submitBtn">Buy / Long</button>
+
+ <!-- Bottom Nav Tabs -->
+<div class="bottom-tabs">
+  <div class="bottom-tab active" id="tabPositionsCount" onclick="switchBottomTab('positions')">Positions (0)</div>
+  <div class="bottom-tab" id="tabOrdersCount" onclick="switchBottomTab('orders')">Open Orders (0)</div>
+  <div class="bottom-tab" id="tabBots" onclick="switchBottomTab('bots')">Bots</div>
+</div>
+
+<!-- SEHEMU MPYA: Orodha ya Oda zilizo wazi (Pending Orders) -->
+<div id="ordersListContainer" style="display: none; padding: 10px 0;">
+    <!-- Oda zitaongezwa hapa kwa JavaScript -->
+    <div style="text-align: center; color: #848e9c; font-size: 12px; padding: 20px 0;" id="noOrdersMsg">No Open Orders</div>
+</div>
+
+  <div class="hide-pairs">
+    <input type="checkbox" id="hidePairs">
+    <label for="hidePairs">Hide Other Pairs</label>
+  </div>
+
+  <!-- Position Card (Sasa imetengenezewa ID za Dynamic JS Updates) -->
+  <div class="position-card" id="posCardContainer" style="display: none;">
+    <div class="pos-header">
+      <span class="pos-badge" id="posSideBadge">B</span>
+      <span class="pos-title" id="posSymbol">--</span>
+      <span class="pos-tags">Perp</span>
+      <span class="pos-tags" id="posMarginLeverage">Cross --x</span>
+    </div>
+
+    <div class="pnl-section">
+      <div class="pnl-label">PNL (USDC)</div>
+      <div class="pnl-value" id="posPnl">0.00</div>
+    </div>
+
+    <div class="pos-grid">
+      <div class="grid-item">
+        <label>Size (USDC)</label>
+        <span id="posSize">0.00</span>
+      </div>
+      <div class="grid-item">
+        <label>Margin (USDC)</label>
+        <span id="posMargin">0.00</span>
+      </div>
+      <div class="grid-item">
+        <label>Entry Price (USDC)</label>
+        <span id="posEntryPrice">0.0000</span>
+      </div>
+      <div class="grid-item">
+        <label>Mark Price (USDC)</label>
+        <span id="posMarkPrice">0.0000</span>
+      </div>
+    </div>
+
+    <div class="pos-actions">
+      <button class="pos-btn" type="button">Leverage</button>
+      <button class="pos-btn" type="button">TP/SL</button>
+    </div>
+  </div>
+
+  <!-- Ujumbe ukiwa huna Position iliyo wazi -->
+  <div id="noPositionMsg" style="text-align: center; color: #848e9c; padding: 20px 0; font-size: 12px;">
+    No Open Position
+  </div>
+</div>
+
+<!--ORDERBOOK-->
+<div class="bodiyi">
+<div class="order-book">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-col">
+      <span>Price</span>
+      <span>(USDC)</span>
+    </div>
+    <div class="header-col right">
+      <span>Amount</span>
+      <span>(USDC)</span>
+    </div>
+  </div>
+
+  <!-- Asks (Sells) -->
+  <div id="asks" class="rows-container asks"></div>
+
+  <!-- Middle Price -->
+  <div class="mark-price-container">
+    <div id="mark-price" class="mark-price">--</div>
+    <div id="index-price" class="index-price">--</div>
+  </div>
+
+  <!-- Bids (Buys) -->
+  <div id="bids" class="rows-container bids"></div>
+
+  <!-- Ratio / Sentiment Bar -->
+  <div class="ratio-container">
+    <div class="ratio-values">
+      <span id="bid-pct" class="bid-pct">50.00%</span>
+      <span id="ask-pct" class="ask-pct">50.00%</span>
+    </div>
+    <div class="ratio-bar">
+      <div id="bid-fill" class="bid-fill" style="width: 50%;"></div>
+      <div id="ask-fill" class="ask-fill" style="width: 50%;"></div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+<!--ORDERBOOK SCRIPT-->
+<script type="module" src="bnc_orderbook.js"></script>
+
+<!--FORM SCRIPT-->
+<script src="form_script_1.js"></script>
+
+
+</body>
+</html>
