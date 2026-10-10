@@ -1,8 +1,8 @@
 // ==========================================
 // 1. CONFIGURATION NA GLOBAL VARIABLES
 // ==========================================
-const API_KEY = 'FrK30aNhbasA9VRgMLCRIF6lF9tl8VMrW8csINQurVGuaPWFK7Ir8tQvNX7PkuV2';
-const API_SECRET = '745JBvQU5gttAWsSzhVrhh7SlvAcQzE1gHb9brSX7p8J7ycHpxNoMa5nQPIHWHHI';
+const API_KEY = '';
+const API_SECRET = '';
 const WS_URL = 'wss://ws-fapi.binance.com/ws-fapi/v1';
 
 let ws = null;
