@@ -5,12 +5,7 @@ body {
 
 #container {
   background: black;
-  position: relative;
-  width: 100%;
-  height: 40vh; /* Badilisha 40vh kuwa fixed height mfano 300px au 350px */
-  flex-shrink: 0; /* Inazuia flexbox kuto-resize chart */
-  overflow: hidden;
-  display: flex; /* Badilisha kutoka flex kwenda block kama ndani ina chart pekee */
+ height: 50vh;
 }
 
 /* ORDERBOOK, FORM BODY */
@@ -326,6 +321,8 @@ tr:hover { background-color: #2b313a; }
 .badge-okx { background-color: #353945; color: #ffffff; }
 .badge-binance { background-color: #f0b90b; color: #000000; }
 .badge-coinbase { background-color: #0052ff; color: #ffffff; }
+.badge-bybit { background-color: yellow; color: red; }
+
 
 #overflowT {
   background: transparent;
@@ -346,3 +343,43 @@ tr:hover { background-color: #2b313a; }
     border-top: 1px dashed #363c4e;
     border-bottom: 1px dashed #363c4e;
 }
+
+/* Muonekano wa batani ya kuchagua dakika */
+        .time-selector {
+            padding: 4px 2px;
+            margin-left: 3px;
+            margin-top: 3px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            outline: none;
+            font-weight: bold;
+            width: 95px;
+        }
+        .time-selector:hover {
+            background-color: #e2e6ea;
+        }
+       
+    /* Muonekano wa batani ya kuchagua dakika */
+        .coin-selector {
+            padding: 4px 2px;
+            margin-left: 3px;
+            margin-top: 3px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            outline: none;
+            font-weight: bold;
+            width: 125px;
+        }
+        .time-selector:hover {
+            background-color: #e2e6ea;
+        }
+       
+  /*ORDERBOOK BUTTONS*/
+ .qty-filter{
+ padding: 3px;
+ border-radius: 3px;
+} 
