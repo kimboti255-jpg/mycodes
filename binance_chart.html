@@ -6,20 +6,44 @@
     <link rel='stylesheet' href='style.css'>
     <title>Lightweight Charts™ Customization Tutorial</title>
     <!-- Adding the standalone version of Lightweight charts -->
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="lightweight-charts.standalone.production.js"></script>
   </head>
   
   <body>
   <!--CHART-->
-    <div id="container"></div>
+  BUY VOLUME: <span id="totalBuyVolume" style="color:blue";>0.00</span>
+SEL VOLUME: <span id="totalSellVolume" style="color:blue";>0.00</span>
+TOTAL VOLUME: <span id="totalVolume" style="color: blue;">0.00</span>
+<script src="volume.js" type="module"></script>
+    <div id="container">
+        <!-- Dropdown inayofanya kazi kama batani -->
+        <select id="coinSelector" class="coin-selector" onchange="updateChartcoin()">
+    <option value="BTC_USDT">BTC/USDT</option>
+    <option value="DOGE_USDT">DOGE/USDT</option>
+    </select>
+    <select id="timeSelector" class="time-selector" onchange="updateChartLink()">
+        <option value="1">1 Min</option>
+        <option value="3">3 Min</option>
+        <option value="5">5 Min</option>
+        <option value="10">10 Min</option>
+        <option value="15" selected>15 Min</option>
+        <option value="30">30 Min</option>
+        <option value="60">1 Hour</option>
+        <option value="240">4 Hour</option>
+        <option value="1440">1 Day</option>
+    </select>
+    </div>
     
     <!--ORDERS-->    
     <!-- Batani ya kuwasha/kuzima Auto-Refresh -->
     <div class="controls-container">
         <button id="toggle-refresh-btn" class="toggle-btn active" onclick="toggleAutoRefresh()">
-            ⏸ STOP Auto-Update (7 sec)
+            ⏸<span class="status" id="last-updated">ORDERBOOK LOADING...</span>
         </button>
-        <span class="status" id="last-updated">ORDERBOOK LOADING...</span>
+        
+          <button class="qty-filter" id="qtyBtn" onclick="changeQty()">1$ <span>▼</span></button> 
+<button class="qty-filter" id="minBtn" onclick="changeMin()">0.00 mins <span>▼</span></button>  
+<button class="qty-filter" id="numBtn" onclick="changeNum()">30 List <span>▼</span></button> 
     </div>
  
 <div id="overflowT"
@@ -61,21 +85,86 @@
  
     <!--GET PAIR FROM URL-->
 <script>
-const url = new URL(window.location.href);
-const pea = url.searchParams.get('pair');
-let coin = pea;
-if (coin) {
-    coin = coin.slice(0, -5);
-} 
-document.getElementById("coin").innerHTML = coin;
-document.getElementById("pea").value = pea ||'';
-</script>
+//==========SELECT SYMBOLS================
+// Global variable
+let selectedSy = localStorage.getItem('selectedSy') || "BTC_USDT";
+let pea = selectedSy;
 
+// Function ya update (Hii ndiyo inayoitwa na dropdown)
+function updateChartcoin() {
+    const selekta = document.getElementById("coinSelector");
+    selectedSy = selekta.value; // Inabadilisha ile Global variable
+    localStorage.setItem('selectedSy', selectedSy);
+    
+    location.reload(); //refresh browser 
+}
+
+// Kwenye event listener
+document.addEventListener("DOMContentLoaded", () => {
+    const selekta = document.getElementById("coinSelector");
+    
+    // Weka thamani ya awali
+    selekta.value = selectedSy;
+
+    // Sikiliza mabadiliko
+    selekta.addEventListener("change", updateChartcoin);
+});
+</script>
+<script>
+//==========SELECT TIMES====================
+// 1. Tangaza variable global nje ya function yoyote
+let selectedMin = localStorage.getItem('selectedMin') || "15"; // Default ni 5 kama hakuna kitu
+
+const selector = document.getElementById("timeSelector");
+
+// Function ya ku-update thamani
+function updateChartLink() {
+    selectedMin = selector.value; // Inabadilisha thamani ya global variable
+    localStorage.setItem('selectedMin', selectedMin);
+    
+    console.log("Thamani mpya ni: " + selectedMin);
+    
+    // Hapa unaweza kuita function nyingine unayotaka
+    // mfano: drawChart(); 
+    
+    // Kama unataka ukurasa u-refresh kabisa (sio recommended sana):
+    location.reload(); 
+}
+
+// 2. Sikiliza tukio la kubofya (change event)
+// Tumia DOMContentLoaded kuhakikisha vitu vyote vimepakia
+document.addEventListener("DOMContentLoaded", () => {
+    const selector = document.getElementById("timeSelector");
+    
+    if (!selector) return; // Zuia error kama element haipo
+
+    // 1. Weka thamani iliyohifadhiwa ukurasa unapofunguka
+    const savedMin = localStorage.getItem('selectedMin');
+    if (savedMin) {
+        selector.value = savedMin;
+    }
+
+    // 2. Function ya update
+    function updateChartLink() {
+        const selectedMin = selector.value;
+        localStorage.setItem('selectedMin', selectedMin);
+        console.log("Thamani mpya ni: " + selectedMin);
+        
+        // Badala ya location.reload(), ita function yako hapa
+        // drawChart(selectedMin); 
+    }
+
+    // 3. Sikiliza mabadiliko
+    selector.addEventListener("change", updateChartLink);
+});
+//================END=====================
+</script>
+    
 <!--CHART SCRIPTS-->
-<script src="b_chart_script.js"></script>
+<script src="chart.js"></script>
 
  <!--LARGE ORDERS SCRIPT-->
- <script src="large_orders.js" type="module"></script>
+ <script src="btc_usdt.js"></script>
 
   </body>
 </html>

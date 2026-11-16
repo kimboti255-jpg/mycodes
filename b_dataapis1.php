@@ -3,14 +3,14 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
-//PATA JINA LA SARAFU KUTOKA KWENYE LINK
+// Pata jina la sarafu (pair) - Default ni BTC_USDT
 $pea = $_GET['pair'] ?? '';
 
-$symbol = isset($_GET['symbol']) ? $_GET['symbol'] : "$pea";
+// Pata thamani ya min - Default ni 15
+$dk = $_GET['minutes'] ?? ''; 
 
-
-// 1. Vuta data kutoka MEXC (PHP haiathiriwi na CORS)
-$mexcUrl = "https://api.mexc.com/api/v1/contract/kline/$pea?interval=Min5&limit=300";
+// Unda URL ya API
+$mexcUrl ="https://api.mexc.com/api/v1/contract/kline/$pea?interval=Min$dk&limit=300";
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $mexcUrl);
@@ -20,12 +20,17 @@ $response = curl_exec($ch);
 curl_close($ch);
 
 if (!$response) {
-    echo json_encode(["success" => false, "message" => "Failed to fetch data from MEXC"]);
+    echo json_encode(["success" => false, "message" => "Failed to fetch data from source"]);
     exit();
 }
 
-// 2. Geuza JSON ya MEXC kuwa PHP Array
+// 2. Geuza JSON kuwa PHP Array
 $rawData = json_decode($response, true);
+
+// Kama data imewekwa kwenye array ya nje kabisa [0], ichukue kupitia index ya 0
+if (isset($rawData[0])) {
+    $rawData = $rawData[0];
+}
 
 // 3. Hakikisha data zipo na badilisha Strings kuwa Numbers/Floats
 if (isset($rawData['data']) && isset($rawData['data']['time'])) {
@@ -52,4 +57,4 @@ if (isset($rawData['data']) && isset($rawData['data']['time'])) {
 } else {
     echo json_encode(["success" => false, "message" => "Invalid MEXC structure"]);
 }
-?>
+?> 
